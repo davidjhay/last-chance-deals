@@ -1,0 +1,27 @@
+build/build.version
+build/tmp
+webapp/ROOT/WEB-INF/lib/
+*.ipr
+*.iws
+out
+.idea
+.DS_Store
+vagrant/.vagrant
+.gradle
+build
+vagrant/client.pem*
+classes
+clover.license
+
+# IntelliJ IDEA
+atlassian-ide-plugin.xml
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings
+bin/
+test-output/
+
+
