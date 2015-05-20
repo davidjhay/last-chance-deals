@@ -4,11 +4,14 @@
 <h2>Last Chance Deals</h2>
 <form action="../" method="POST">
     <label>Destination</label>
-    <input type="text" name="destination" size="75"><br/><br/>
+    <input type="text" name="destination" size="25">
+    <label>Date</label>
+    <input type="text" name="date" size="25">
+    <input type="submit" name="submit" value="Get Deals"><br/><br/>
     <label>End point</label>
-    <input type="text" name="url" value="http://4-hackathon.hotel-deals-per-day.appspot.com/deals" size="100"><br/><br/>
+    <input type="text" name="url" value="http://4-hackathon.hotel-deals-per-day.appspot.com/deals" size="100"> <input type="submit" name="submit" value="Test"><br/><br/>
     <input type="submit" name="submit" value="Subscribe"><br/><br/>
-    <input type="submit" name="submit" value="Test End Point">
+
 </form>
 {% if message  %}
 <h4>{{ message }}</h4>

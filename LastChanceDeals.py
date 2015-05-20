@@ -4,8 +4,6 @@ from flask import render_template
 import urllib.request
 import json
 
-import time
-
 app = Flask(__name__)
 
 @app.route('/')
@@ -21,16 +19,30 @@ def my_form_post():
         subscriberCount = subscriber.displayCount()
         message = 'Conratulations, the URL ' + url + ' is now subscribed to Last Chance Deals for ' + destination
         return render_template('LastChanceDeals.html', message=message, subscriberCount=subscriberCount)
-    elif request.form['submit'] == 'Test End Point':
+    elif request.form['submit'] == 'Test':
         data = open('sample.json', 'r').readline().encode('utf-8')
         req = urllib.request.Request(url, data, {'Content-Type': 'application/json'})
         try:
-            response = urllib.request.urlopen(req)
+            urllib.request.urlopen(req)
             testMessage = 'Test json successfully sent to ' + url
         except:
             testMessage = 'Failed to send test response to ' + url
-
         return render_template('LastChanceDeals.html', message=testMessage)
+    elif request.form['submit'] == 'Get Deals':
+        response = dailyDealCheck(destination)
+        filterDate('5/21/2015', response)
+        return render_template('LastChanceDeals.html', message=response)
+
+def filterDate(dateToBeFiltered, response):
+    jsonResponse = json.loads(response)
+    print(jsonResponse["effectiveEndDate"])
+
+
+def dailyDealCheck(location):
+    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?destinationString='
+    req = urllib.request.Request(url + location)
+    response = urllib.request.urlopen(req)
+    return response.read().decode('utf-8')
 
 class Subscription:
     subscriberCount = 0
@@ -46,8 +58,6 @@ class Subscription:
     def displaySubscriber(self):
         print("nothing")
 
-def dailyDealCheck():
-    print( time.ctime())
 
 if __name__ == '__main__':
     app.run(debug=True)
