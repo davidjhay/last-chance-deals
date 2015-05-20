@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<h2>Last Chance Deals</h2>
+<form action="../" method="POST">
+    <label>Destination</label>
+    <input type="text" name="destination"><br/><br/>
+    <label>End point</label>
+    <input type="text" name="url"><br/><br/>
+    <input type="submit" name="submit" value="Subscribe"><br/><br/>
+    <input type="submit" name="submit" value="Test">
+</form>
+{% if message  %}
+<h4>{{ message }}</h4>
+{% endif %}
+{% if subscriberCount %}
+<h4>Number of subscribers {{ subscriberCount }}</h4>
+{% endif %}
+</body>
+</html>
