@@ -22,18 +22,14 @@ def my_form_post():
         message = 'Conratulations, the URL ' + url + ' is now subscribed to Last Chance Deals for ' + destination
         return render_template('LastChanceDeals.html', message=message, subscriberCount=subscriberCount)
     elif request.form['submit'] == 'Test End Point':
-
-        #url = 'http://requestb.in/ter1odte'
-        #url = 'http://4-hackathon.hotel-deals-per-day.appspot.com/deals'
-
-        f = open('sample.json', 'r')
-        jsonString = ''
-        for line in f:
-            jsonString += line
-        data = jsonString.encode('utf-8')
+        data = open('sample.json', 'r').readline().encode('utf-8')
         req = urllib.request.Request(url, data, {'Content-Type': 'application/json'})
-        response = urllib.request.urlopen(req)
-        testMessage = 'Test json sent to url ' + url
+        try:
+            response = urllib.request.urlopen(req)
+            testMessage = 'Test json successfully sent to ' + url
+        except:
+            testMessage = 'Failed to send test response to ' + url
+
         return render_template('LastChanceDeals.html', message=testMessage)
 
 class Subscription:
