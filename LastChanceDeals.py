@@ -22,7 +22,7 @@ def my_form_post():
         subscribers.append(Subscription(url, destination))
         message = 'Conratulations, the URL ' + url + ' is now subscribed to Last Chance Deals for ' + destination
         return render_template('LastChanceDeals.html', message=message)
-    elif request.form['submit'] == 'Test':
+    elif request.form['submit'] == 'Test End Point':
         data = open('sample.json', 'r').readline().encode('utf-8')
         testMessage = notify(data, url)
         return render_template('LastChanceDeals.html', message=testMessage)
