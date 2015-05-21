@@ -16,6 +16,13 @@
 {% if message  %}
 <h4>{{ message }}</h4>
 {% endif %}
+{% if responses %}
+<ul>
+    {% for item in responses %}
+    <li>{{ item }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% if subscriberCount %}
 <h4>Number of subscribers {{ subscriberCount }}</h4>
 {% endif %}
