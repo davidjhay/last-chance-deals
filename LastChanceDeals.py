@@ -61,7 +61,7 @@ def isWithin24Hours(dateToBeFiltered, effectiveEndDate):
 
 def dailyDealCheck(location):
     url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?' \
-          'destinationString=Seattle,+WA,+US'
+          'destinationString='
     with contextlib.closing(urllib.request.urlopen(url + location)) as x:
         responseString = x.read().decode('utf-8')
     return responseString
