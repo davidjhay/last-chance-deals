@@ -5,7 +5,7 @@ from flask import request
 from flask import render_template
 import urllib.request
 import json
-import Subscription
+from Subscription import Subscription
 
 app = Flask(__name__)
 
@@ -18,8 +18,7 @@ def my_form_post():
     url = request.form['url']
     destination = request.form['destination']
     if request.form['submit'] == 'Subscribe':
-        subscriber = Subscription(url, destination)
-        subscribers.append(subscriber)
+        subscribers.append(Subscription(url, destination))
         message = 'Conratulations, the URL ' + url + ' is now subscribed to Last Chance Deals for ' + destination
         return render_template('LastChanceDeals.html', message=message)
     elif request.form['submit'] == 'Test':
@@ -30,10 +29,10 @@ def my_form_post():
         filteredDeals = retrieveDeals()
         #response = dailyDealCheck(destination)
         #response = filterDate(request.form['date'], response)
-        for Subscription in subscribers:
+        for subscription in subscribers:
             for Deal in filteredDeals:
-                if Subscription.destination == Deal.destination:
-                    response = notify(Deal.response, Subscription.url)
+                if subscription.destination == Deal.destination:
+                    response = notify(Deal.response, subscription.url)
 
         return render_template('LastChanceDeals.html', message='DONE')
 
