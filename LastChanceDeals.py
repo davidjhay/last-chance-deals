@@ -28,14 +28,12 @@ def my_form_post():
         return render_template('LastChanceDeals.html', message=testMessage)
     elif request.form['submit'] == 'Get Deals':
         filteredDeals = retrieveDeals()
-        #response = dailyDealCheck(destination)
-        #response = filterDate(request.form['date'], response)
+        response = ''
         for subscription in subscribers:
             for Deal in filteredDeals:
                 if subscription.destination == Deal.destination:
-                    response = notify(Deal.response, subscription.url)
-
-        return render_template('LastChanceDeals.html', message='DONE')
+                    response += notify(Deal.response, subscription.url) + ' for ' + Deal.destination + '.'
+        return render_template('LastChanceDeals.html', message=response)
 
 def retrieveDeals():
     deals = [ ]
@@ -91,9 +89,4 @@ def dailyDealCheck(location):
 
 if __name__ == '__main__':
     subscribers = [ ]
-    #TEMP CODE
-    # subscribers.append (Subscription('testurl1', 'Chicago'))
-    # subscribers.append (Subscription('testurl2', 'Denver'))
-    # subscribers.append (Subscription('testurl2', 'Chicago'))
-
     app.run(debug=True)
