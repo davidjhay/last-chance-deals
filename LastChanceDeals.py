@@ -39,8 +39,10 @@ def retrieveDeals():
     deals = [ ]
     for destination in uniqueDestinations():
         response = dailyDealCheck(destination)
-        response = filterDate(request.form['date'], response)
-        deals.append(Deal(destination, response))
+
+        if response != '' and response is not None:
+            response = filterDate(request.form['date'], response)
+            deals.append(Deal(destination, response))
     return deals
 
 def uniqueDestinations():
