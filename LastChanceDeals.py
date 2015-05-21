@@ -1,9 +1,10 @@
+import contextlib
+from datetime import datetime
 from flask import Flask
 from flask import request
 from flask import render_template
 import urllib.request
 import json
-import contextlib
 
 app = Flask(__name__)
 
@@ -23,17 +24,13 @@ def my_form_post():
         return render_template('LastChanceDeals.html', message=message, subscriberCount=subscriberCount)
     elif request.form['submit'] == 'Test':
         data = open('sample.json', 'r').readline().encode('utf-8')
-        req = urllib.request.Request(url, data, {'Content-Type': 'application/json'})
-        try:
-            urllib.request.urlopen(req)
-            testMessage = 'Test json successfully sent to ' + url
-        except:
-            testMessage = 'Failed to send test response to ' + url
+        testMessage = notify(data, url)
         return render_template('LastChanceDeals.html', message=testMessage)
     elif request.form['submit'] == 'Get Deals':
         deals = retrieveDeals()
         response = dailyDealCheck(destination)
-        filterDate('5/21/2015', response)
+        response = filterDate(request.form['date'], response)
+        response = notify(response, url)
         return render_template('LastChanceDeals.html', message=response)
 
 def retrieveDeals():
@@ -49,9 +46,6 @@ def uniqueDestinations():
         uniqueDestinationList.add(Subscription.destination)
     return uniqueDestinationList
 
-def filterDate(dateToBeFiltered, response):
-    jsonResponse = json.loads(response)
-
 def dailyDealCheck(location):
     url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?destinationString='
     with contextlib.closing(urllib.request.urlopen(url + location)) as x:
@@ -62,6 +56,32 @@ class Deal:
     def __init__(self, destination, response):
         self.destination = destination
         self.response = response
+
+def notify(data, url):
+    req = urllib.request.Request(url, data, {'Content-Type': 'application/json'})
+    try:
+        urllib.request.urlopen(req)
+        notificationMessage = 'Notification successfully sent to ' + url
+    except:
+        notificationMessage = 'Failed to notify ' + url
+    return notificationMessage
+
+def filterDate(dateToBeFiltered, response):
+    jsonResponse = json.loads(response)
+    filteredJsonResponse = []
+    for deal in jsonResponse:
+        effectiveEndDate = deal["effectiveEndDate"]
+        if isWithin24Hours(dateToBeFiltered, effectiveEndDate):
+            filteredJsonResponse.append(deal)
+    return bytes(json.dumps(filteredJsonResponse), encoding='utf-8')
+
+def isWithin24Hours(dateToBeFiltered, effectiveEndDate):
+    endDate = datetime.strptime(effectiveEndDate, '%Y-%m-%d %H:%M:%S')
+    if dateToBeFiltered == '':
+        now = datetime.now()
+    else:
+        now = datetime.strptime(dateToBeFiltered, '%Y-%m-%d %H:%M:%S')
+    return (endDate - now).days == 0
 
 class Subscription:
     subscriberCount = 0
@@ -76,8 +96,6 @@ class Subscription:
 
     def displaySubscriber(self):
         print("nothing")
-
-
 
 if __name__ == '__main__':
     subscribers = [ ]
