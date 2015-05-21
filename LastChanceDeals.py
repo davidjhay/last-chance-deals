@@ -35,6 +35,20 @@ def my_form_post():
                     responses.append(notify(Deal.response, subscription.url) + ' for ' + Deal.destination)
         return render_template('LastChanceDeals.html', responses=responses)
 
+@app.route('/demo', methods=['GET', 'POST'])
+def demo():
+    if request.method == 'POST':
+        if request.form['submit'] == 'Get Deals':
+            filteredDeals = retrieveDeals()
+            responses = [ ]
+            for subscription in subscribers:
+                for Deal in filteredDeals:
+                    if subscription.destination == Deal.destination:
+                        responses.append(notify(Deal.response, subscription.url) + ' for ' + Deal.destination)
+            return render_template('Demo.html', responses=responses)
+    else:
+        return render_template('Demo.html')
+
 def retrieveDeals():
     deals = [ ]
     for destination in uniqueDestinations():

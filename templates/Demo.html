@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+<h2>Last Chance Deals</h2>
+<form action="../demo" method="POST">
+    <label>Date</label>
+    <input type="text" name="date" size="25">
+    <input type="submit" name="submit" value="Get Deals"><br/><br/>
+</form>
+{% if responses %}
+<ul>
+    {% for item in responses %}
+    <li>{{ item }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+</body>
+</html>
