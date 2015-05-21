@@ -3,6 +3,7 @@ from flask import request
 from flask import render_template
 import urllib.request
 import json
+import contextlib
 
 app = Flask(__name__)
 
@@ -16,7 +17,8 @@ def my_form_post():
     destination = request.form['destination']
     if request.form['submit'] == 'Subscribe':
         subscriber = Subscription(url, destination)
-        subscriberCount = subscriber.displayCount()
+        subscribers.append(subscriber)
+        subscriberCount = subscribers.count()
         message = 'Conratulations, the URL ' + url + ' is now subscribed to Last Chance Deals for ' + destination
         return render_template('LastChanceDeals.html', message=message, subscriberCount=subscriberCount)
     elif request.form['submit'] == 'Test':
@@ -29,20 +31,37 @@ def my_form_post():
             testMessage = 'Failed to send test response to ' + url
         return render_template('LastChanceDeals.html', message=testMessage)
     elif request.form['submit'] == 'Get Deals':
+        deals = retrieveDeals()
         response = dailyDealCheck(destination)
         filterDate('5/21/2015', response)
         return render_template('LastChanceDeals.html', message=response)
 
+def retrieveDeals():
+    deals = [ ]
+    for destination in uniqueDestinations():
+        response = dailyDealCheck(destination)
+        deals.append(Deal(destination, response))
+    return deals
+
+def uniqueDestinations():
+    uniqueDestinationList = set()
+    for Subscription in subscribers:
+        uniqueDestinationList.add(Subscription.destination)
+    return uniqueDestinationList
+
 def filterDate(dateToBeFiltered, response):
     jsonResponse = json.loads(response)
-    print(jsonResponse["effectiveEndDate"])
-
 
 def dailyDealCheck(location):
     url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?destinationString='
-    req = urllib.request.Request(url + location)
-    response = urllib.request.urlopen(req)
-    return response.read().decode('utf-8')
+    with contextlib.closing(urllib.request.urlopen(url + location)) as x:
+        responseString = x.read().decode('utf-8')
+    return responseString
+
+class Deal:
+    def __init__(self, destination, response):
+        self.destination = destination
+        self.response = response
 
 class Subscription:
     subscriberCount = 0
@@ -59,5 +78,12 @@ class Subscription:
         print("nothing")
 
 
+
 if __name__ == '__main__':
+    subscribers = [ ]
+    #TEMP CODE
+    subscribers.append (Subscription('testurl1', 'Chicago'))
+    subscribers.append (Subscription('testurl2', 'Denver'))
+    subscribers.append (Subscription('testurl2', 'Chicago'))
+
     app.run(debug=True)
