@@ -28,12 +28,12 @@ def my_form_post():
         return render_template('LastChanceDeals.html', message=testMessage)
     elif request.form['submit'] == 'Get Deals':
         filteredDeals = retrieveDeals()
-        response = ''
+        responses = [ ]
         for subscription in subscribers:
             for Deal in filteredDeals:
                 if subscription.destination == Deal.destination:
-                    response += notify(Deal.response, subscription.url) + ' for ' + Deal.destination + '.'
-        return render_template('LastChanceDeals.html', message=response)
+                    responses.append(notify(Deal.response, subscription.url) + ' for ' + Deal.destination)
+        return render_template('LastChanceDeals.html', responses=responses)
 
 def retrieveDeals():
     deals = [ ]
