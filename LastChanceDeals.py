@@ -88,6 +88,12 @@ def isWithin24Hours(dateToBeFiltered, effectiveEndDate):
         now = datetime.strptime(dateToBeFiltered, '%Y-%m-%d %H:%M:%S')
     return (endDate - now).days == 0
 
+def dailyDealCheck(location):
+    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?' \
+          'destinationString='
+    with contextlib.closing(urllib.request.urlopen(url + location)) as x:
+        responseString = x.read().decode('utf-8')
+    return responseString
 
 if __name__ == '__main__':
     subscribers = [ ]
