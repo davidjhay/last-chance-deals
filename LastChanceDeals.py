@@ -51,12 +51,6 @@ def uniqueDestinations():
         uniqueDestinationList.add(Subscription.destination)
     return uniqueDestinationList
 
-def dailyDealCheck(location):
-    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?destinationString='
-    with contextlib.closing(urllib.request.urlopen(url + location)) as x:
-        responseString = x.read().decode('utf-8')
-    return responseString
-
 class Deal:
     def __init__(self, destination, response):
         self.destination = destination
