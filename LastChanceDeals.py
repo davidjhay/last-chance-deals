@@ -1,3 +1,5 @@
+import contextlib
+from datetime import datetime
 from flask import Flask
 from flask import request
 from flask import render_template
@@ -21,28 +23,48 @@ def my_form_post():
         return render_template('LastChanceDeals.html', message=message, subscriberCount=subscriberCount)
     elif request.form['submit'] == 'Test':
         data = open('sample.json', 'r').readline().encode('utf-8')
-        req = urllib.request.Request(url, data, {'Content-Type': 'application/json'})
-        try:
-            urllib.request.urlopen(req)
-            testMessage = 'Test json successfully sent to ' + url
-        except:
-            testMessage = 'Failed to send test response to ' + url
+        testMessage = notify(data, url)
         return render_template('LastChanceDeals.html', message=testMessage)
     elif request.form['submit'] == 'Get Deals':
         response = dailyDealCheck(destination)
-        filterDate('5/21/2015', response)
+        response = filterDate(request.form['date'], response)
+        response = notify(response, url)
         return render_template('LastChanceDeals.html', message=response)
+
+
+def notify(data, url):
+    req = urllib.request.Request(url, data, {'Content-Type': 'application/json'})
+    try:
+        urllib.request.urlopen(req)
+        notificationMessage = 'Notification successfully sent to ' + url
+    except:
+        notificationMessage = 'Failed to notify ' + url
+    return notificationMessage
+
 
 def filterDate(dateToBeFiltered, response):
     jsonResponse = json.loads(response)
-    print(jsonResponse["effectiveEndDate"])
+    filteredJsonResponse = []
+    for deal in jsonResponse:
+        effectiveEndDate = deal["effectiveEndDate"]
+        if isWithin24Hours(dateToBeFiltered, effectiveEndDate):
+            filteredJsonResponse.append(deal)
+    return bytes(json.dumps(filteredJsonResponse), encoding='utf-8')
 
+def isWithin24Hours(dateToBeFiltered, effectiveEndDate):
+    endDate = datetime.strptime(effectiveEndDate, '%Y-%m-%d %H:%M:%S')
+    if dateToBeFiltered == '':
+        now = datetime.now()
+    else:
+        now = datetime.strptime(dateToBeFiltered, '%Y-%m-%d %H:%M:%S')
+    return (endDate - now).days == 0
 
 def dailyDealCheck(location):
-    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?destinationString='
-    req = urllib.request.Request(url + location)
-    response = urllib.request.urlopen(req)
-    return response.read().decode('utf-8')
+    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?' \
+          'destinationString=Seattle,+WA,+US'
+    with contextlib.closing(urllib.request.urlopen(url + location)) as x:
+        responseString = x.read().decode('utf-8')
+    return responseString
 
 class Subscription:
     subscriberCount = 0
