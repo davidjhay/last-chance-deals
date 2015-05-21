@@ -5,6 +5,7 @@ from flask import request
 from flask import render_template
 import urllib.request
 import json
+import Subscription
 
 app = Flask(__name__)
 
@@ -19,24 +20,28 @@ def my_form_post():
     if request.form['submit'] == 'Subscribe':
         subscriber = Subscription(url, destination)
         subscribers.append(subscriber)
-        subscriberCount = subscribers.count()
         message = 'Conratulations, the URL ' + url + ' is now subscribed to Last Chance Deals for ' + destination
-        return render_template('LastChanceDeals.html', message=message, subscriberCount=subscriberCount)
+        return render_template('LastChanceDeals.html', message=message)
     elif request.form['submit'] == 'Test':
         data = open('sample.json', 'r').readline().encode('utf-8')
         testMessage = notify(data, url)
         return render_template('LastChanceDeals.html', message=testMessage)
     elif request.form['submit'] == 'Get Deals':
-        deals = retrieveDeals()
-        response = dailyDealCheck(destination)
-        response = filterDate(request.form['date'], response)
-        response = notify(response, url)
-        return render_template('LastChanceDeals.html', message=response)
+        filteredDeals = retrieveDeals()
+        #response = dailyDealCheck(destination)
+        #response = filterDate(request.form['date'], response)
+        for Subscription in subscribers:
+            for Deal in filteredDeals:
+                if Subscription.destination == Deal.destination:
+                    response = notify(Deal.response, Subscription.url)
+
+        return render_template('LastChanceDeals.html', message='DONE')
 
 def retrieveDeals():
     deals = [ ]
     for destination in uniqueDestinations():
         response = dailyDealCheck(destination)
+        response = filterDate(request.form['date'], response)
         deals.append(Deal(destination, response))
     return deals
 
@@ -83,19 +88,6 @@ def isWithin24Hours(dateToBeFiltered, effectiveEndDate):
         now = datetime.strptime(dateToBeFiltered, '%Y-%m-%d %H:%M:%S')
     return (endDate - now).days == 0
 
-class Subscription:
-    subscriberCount = 0
-
-    def __init__(self, url, destination):
-        self.url = url
-        self.destination = destination
-        Subscription.subscriberCount += 1
-
-    def displayCount(self):
-        return self.subscriberCount
-
-    def displaySubscriber(self):
-        print("nothing")
 
 if __name__ == '__main__':
     subscribers = [ ]
