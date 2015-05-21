@@ -4,6 +4,7 @@ from flask import Flask
 from flask import request
 from flask import render_template
 import urllib.request
+import urllib.parse
 import json
 from Subscription import Subscription
 
@@ -82,9 +83,9 @@ def isWithin24Hours(dateToBeFiltered, effectiveEndDate):
     return (endDate - now).days == 0
 
 def dailyDealCheck(location):
-    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?' \
-          'destinationString='
-    with contextlib.closing(urllib.request.urlopen(url + location)) as x:
+    url = 'http://phelcodenauts-deals-prototype001.karmalab.net:7400/ean-services/rs/hotel/v3/deals?'
+    response = urllib.request.urlopen(url + urllib.parse.urlencode({'destinationString':location}))
+    with contextlib.closing(response) as x:
         responseString = x.read().decode('utf-8')
     return responseString
 
