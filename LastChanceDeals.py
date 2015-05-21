@@ -92,8 +92,8 @@ def dailyDealCheck(location):
 if __name__ == '__main__':
     subscribers = [ ]
     #TEMP CODE
-    subscribers.append (Subscription('testurl1', 'Chicago'))
-    subscribers.append (Subscription('testurl2', 'Denver'))
-    subscribers.append (Subscription('testurl2', 'Chicago'))
+    # subscribers.append (Subscription('testurl1', 'Chicago'))
+    # subscribers.append (Subscription('testurl2', 'Denver'))
+    # subscribers.append (Subscription('testurl2', 'Chicago'))
 
     app.run(debug=True)
