@@ -1,3 +1,4 @@
+import concurrent.futures
 import contextlib
 from datetime import datetime
 from flask import Flask
@@ -41,22 +42,29 @@ def demo():
         if request.form['submit'] == 'Get Deals':
             filteredDeals = retrieveDeals()
             responses = [ ]
-            for subscription in subscribers:
-                for Deal in filteredDeals:
-                    if subscription.destination == Deal.destination:
-                        responses.append(notify(Deal.response, subscription.url) + ' for ' + Deal.destination)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                for subscription in subscribers:
+                    for Deal in filteredDeals:
+                        if subscription.destination == Deal.destination:
+                            executor.submit(futureNotify, responses, Deal, subscription)
             return render_template('Demo.html', responses=responses)
     else:
         return render_template('Demo.html')
 
+def futureNotify(responses, Deal, subscription):
+    responses.append(notify(Deal.response, subscription.url) + ' for ' + Deal.destination)
+
 def retrieveDeals():
     deals = [ ]
-    for destination in uniqueDestinations():
-        response = dailyDealCheck(destination)
-
-        if response != '' and response is not None:
-            response = filterDate(request.form['date'], response)
-            deals.append(Deal(destination, response))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = []
+        for destination in uniqueDestinations():
+            futures.append(executor.submit(dailyDealCheck, destination))
+        for future in futures:
+            response = future.result()
+            if response[1] != '' and response[1] is not None:
+                filteredResponse = filterDate(request.form['date'], response[1])
+                deals.append(Deal(response[0], filteredResponse))
     return deals
 
 def uniqueDestinations():
@@ -101,7 +109,7 @@ def dailyDealCheck(location):
     response = urllib.request.urlopen(url + urllib.parse.urlencode({'destinationString':location}))
     with contextlib.closing(response) as x:
         responseString = x.read().decode('utf-8')
-    return responseString
+    return (location, responseString)
 
 if __name__ == '__main__':
     subscribers = [ ]
